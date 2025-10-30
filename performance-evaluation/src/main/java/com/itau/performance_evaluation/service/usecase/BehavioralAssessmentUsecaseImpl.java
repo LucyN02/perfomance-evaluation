@@ -1,62 +1,91 @@
 package com.itau.performance_evaluation.service.usecase;
 
 import com.itau.performance_evaluation.controller.Request.BehavioralAssessmentRequest;
-import com.itau.performance_evaluation.model.BehavioralAssessment;
-import com.itau.performance_evaluation.model.BehavioralEnum;
-import com.itau.performance_evaluation.repository.BehavioralRepository;
+import com.itau.performance_evaluation.model.BehavioralDetail;
+import com.itau.performance_evaluation.model.PerformanceAssessment;
+import com.itau.performance_evaluation.repository.PerformanceAssessmentRepository;
 import com.itau.performance_evaluation.service.BehavioralAssessmentUsecase;
 import com.itau.performance_evaluation.controller.Request.BehavioralAssessmentRequest.BehavioralData;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class BehavioralAssessmentUsecaseImpl implements BehavioralAssessmentUsecase {
 
-    private final BehavioralRepository behavioralRepository;
+    private final PerformanceAssessmentRepository repository;
 
     @Override
-    public void create(BehavioralAssessmentRequest input) {
+    @Transactional
+    public void create(BehavioralAssessmentRequest request) {
 
-        BehavioralAssessment model = mapAndCalculateAssessment(input);
+        Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(request.getEmployeeId());
 
-        this.behavioralRepository.save(model);
+        BehavioralAssessmentData newBehavioralData = mapNewBehavioralData(request);
+
+        PerformanceAssessment assessment;
+
+        if (assessmentOpt.isPresent()) {
+
+            assessment = assessmentOpt.get();
+
+            assessment.setBehaviorFinalAverage(newBehavioralData.finalAverage());
+
+            Set<BehavioralDetail> behaviors = assessment.getBehaviors();
+
+            behaviors.clear();
+
+            behaviors.addAll(newBehavioralData.details());
+        } else {
+            assessment = PerformanceAssessment.builder()
+                    .employeeId( request.getEmployeeId())
+                    .challengeFinalAverage(null)
+                    .behaviorFinalAverage(newBehavioralData.finalAverage())
+                    .behaviors(newBehavioralData.details())
+                    .challenges(Set.of())
+                    .build();
+        }
+
+        newBehavioralData.details().forEach(detail -> detail.setAssessment(assessment));
+
+        this.repository.save(assessment);
     }
 
-    private BehavioralAssessment mapAndCalculateAssessment(BehavioralAssessmentRequest request) {
+    private record BehavioralAssessmentData(Set<BehavioralDetail> details, double finalAverage) {}
 
-        Map<BehavioralEnum, Integer> gradesMap = request.getBehavioralAssessment().stream()
-                .collect(Collectors.toMap(
-                        BehavioralData::getBehavioral,
-                        BehavioralData::getGrade
-                ));
+    private BehavioralAssessmentData mapNewBehavioralData(BehavioralAssessmentRequest request) {
+
+        List<BehavioralData> behaviorsRequest = request.getBehaviors();
 
         double sumWeightedGrades = 0.0;
         int sumWeights = 0;
 
+        for (BehavioralData data : behaviorsRequest) {
 
-        for (Map.Entry<BehavioralEnum, Integer> entry : gradesMap.entrySet()) {
-            BehavioralEnum behavioral = entry.getKey();
-            int grade = entry.getValue();
-            int weight = behavioral.getWeight();
+            int grade = data.getGrade();
+            int weight = data.getBehavioral().getWeight();
 
             sumWeightedGrades += (double) grade * weight;
             sumWeights += weight;
         }
 
+
         double finalAverage = sumWeightedGrades / sumWeights;
 
+        Set<BehavioralDetail> details = behaviorsRequest.stream()
+                .map(data -> BehavioralDetail.builder()
+                        .description(data.getBehavioral().getDescription())
+                        .score(data.getGrade())
+                        .build())
+                .collect(Collectors.toSet());
 
-        return BehavioralAssessment.builder()
-                .employeeId(request.getEmployeeId())
-                .behavioral_1(gradesMap.getOrDefault(BehavioralEnum.BEHAVIORAL_1, 0))
-                .behavioral_2(gradesMap.getOrDefault(BehavioralEnum.BEHAVIORAL_2, 0))
-                .behavioral_3(gradesMap.getOrDefault(BehavioralEnum.BEHAVIORAL_3, 0))
-                .behavioral_4(gradesMap.getOrDefault(BehavioralEnum.BEHAVIORAL_4, 0))
-                .final_average(finalAverage)
-                .build();
+        return new BehavioralAssessmentData(details, finalAverage);
     }
+
 }

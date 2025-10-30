@@ -1,6 +1,6 @@
 package com.itau.performance_evaluation.controller.Request;
 
-import com.itau.performance_evaluation.model.BehavioralEnum;
+import com.itau.performance_evaluation.model.enums.BehavioralEnum;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -18,7 +18,7 @@ public class BehavioralAssessmentRequest {
 
         @Valid
         @Size(min = 4, max = 4, message = "A lista de avaliações deve conter exatamente 4 elementos.")
-        private List<BehavioralData> behavioralAssessment;
+        private List<BehavioralData> behaviors;
 
 
         @Data
