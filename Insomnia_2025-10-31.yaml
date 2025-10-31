@@ -1,0 +1,169 @@
+type: collection.insomnia.rest/5.0
+name: caso tecnico
+meta:
+  id: wrk_bf9aa7cd80874d40a28da5be25b53a07
+  created: 1761922857251
+  modified: 1761936177748
+  description: ""
+collection:
+  - url: http://localhost:8080/api/v1/performance-evaluations/behaviors
+    name: behaviors
+    meta:
+      id: req_fe271d9ac6c74e41b61e188680297f90
+      created: 1761923123433
+      modified: 1761935773741
+      isPrivate: false
+      description: ""
+      sortKey: -1761923123433
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"employeeId": "5",
+        	"behaviors": [
+        		{
+        			"behavioral": "COLLAB",
+        			"grade": 5
+        		},
+        		{
+        			"behavioral": "LEARN",
+        			"grade": 2
+        		},
+        		{
+        			"behavioral": "DATA",
+        			"grade": 5
+        		},
+        		{
+        			"behavioral": "AUTONOMY",
+        			"grade": 5
+        		}
+        	]
+        }
+    parameters:
+      - id: pair_7554017a47484421be442647987e353f
+        name: ""
+        value: ""
+        description: ""
+        disabled: false
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/performance-evaluations/challenges
+    name: challenges
+    meta:
+      id: req_756a5785cbcb48bc9dd45ac1ebea7282
+      created: 1761935736462
+      modified: 1761935769729
+      isPrivate: false
+      description: ""
+      sortKey: -1761935736462
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"employeeId": "5",
+        	"challenges": [
+        		{
+        			"challenge": "AMBIENTE COLABORATIVO",
+        			"grade": 5
+        		},
+        		{
+        			"challenge": "APRENDE O TEMPO TODO",
+        			"grade": 2
+        		},
+        		{
+        			"challenge": "DIVERSIDADE",
+        			"grade": 5
+        		}
+        	]
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8081/api/v1/employees
+    name: employees
+    meta:
+      id: req_5a8132b4837f43e49cf26fa8d4919468
+      created: 1761935757874
+      modified: 1761936095746
+      isPrivate: false
+      description: ""
+      sortKey: -1761935757874
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"name": "Luciana Neves de Brito",
+        	"admissionDate": "2024-09-09",
+        	"position": "Analista de TI"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/performance-evaluations/5
+    name: get evaluations
+    meta:
+      id: req_131d8c3651e0413bbeaa76934d8e4d39
+      created: 1761935766180
+      modified: 1761935767571
+      isPrivate: false
+      description: ""
+      sortKey: -1761935766180
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.2.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_b5a430e51871d1083c0dede62644970490d3b7cb
+    created: 1761922857259
+    modified: 1761922857259
+environments:
+  name: Base Environment
+  meta:
+    id: env_b5a430e51871d1083c0dede62644970490d3b7cb
+    created: 1761922857254
+    modified: 1761922857254
+    isPrivate: false
