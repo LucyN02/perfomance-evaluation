@@ -1,4 +1,4 @@
-package com.itau.performance_evaluation.controller.Request;
+package com.itau.performance_evaluation.controller.request;
 
 import com.itau.performance_evaluation.model.enums.BehavioralEnum;
 import jakarta.validation.Valid;

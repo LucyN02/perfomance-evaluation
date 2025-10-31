@@ -1,7 +1,7 @@
 package com.itau.performance_evaluation.model.enums;
 
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 public enum BehavioralEnum {
     COLLAB("PROMOVE_COLABORACAO", "Você promove um ambiente colaborativo?", 4),
@@ -31,10 +31,11 @@ public enum BehavioralEnum {
         return weight;
     }
 
-    public static Optional<BehavioralEnum> getByCode(String code) {
+    public static BehavioralEnum getByDescription(String description) {
         return Arrays.stream(values())
-                .filter(behavioral -> behavioral.resume.equalsIgnoreCase(code))
-                .findFirst();
+                .filter(behavioral -> behavioral.getDescription().equalsIgnoreCase(description))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Descrição não encontrada: " + description));
     }
 
 }

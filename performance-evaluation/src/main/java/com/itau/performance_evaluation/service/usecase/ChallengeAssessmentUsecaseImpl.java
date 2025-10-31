@@ -1,6 +1,5 @@
 package com.itau.performance_evaluation.service.usecase;
 
-import com.itau.performance_evaluation.controller.Request.ChallengeAssessmentRequest;
 import com.itau.performance_evaluation.model.PerformanceAssessment;
 import com.itau.performance_evaluation.model.ChallengeDetail;
 import com.itau.performance_evaluation.repository.PerformanceAssessmentRepository;
@@ -8,11 +7,9 @@ import com.itau.performance_evaluation.service.ChallengeAssessmentUsecase;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Service
 @AllArgsConstructor
@@ -22,61 +19,42 @@ public class ChallengeAssessmentUsecaseImpl implements ChallengeAssessmentUsecas
 
     @Override
     @Transactional
-    public void create(ChallengeAssessmentRequest request) {
+    public void createOrUpdate(String employeeId, Set<ChallengeDetail> challengeDetails) {
 
-        Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(request.getEmployeeId());
-
-        ChallengeAssessmentData newChallengeData = mapNewChallengeData(request);
+        Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(employeeId);
 
         PerformanceAssessment assessment;
+
+        double sumGrades = challengeDetails.stream()
+                .mapToInt(ChallengeDetail::getScore)
+                .sum();
+
+        double finalAverage = sumGrades / challengeDetails.size();
 
         if (assessmentOpt.isPresent()) {
 
             assessment = assessmentOpt.get();
 
-            assessment.setChallengeFinalAverage(newChallengeData.finalAverage());
+            assessment.setChallengeFinalAverage(finalAverage);
 
             Set<ChallengeDetail> challenges = assessment.getChallenges();
 
             challenges.clear();
 
-            challenges.addAll(newChallengeData.details());
+            challenges.addAll(challengeDetails);
 
         } else {
             assessment = PerformanceAssessment.builder()
-                    .employeeId(request.getEmployeeId())
-                    .challenges(newChallengeData.details())
+                    .employeeId(employeeId)
+                    .challenges(challengeDetails)
                     .behaviors(Set.of())
-                    .challengeFinalAverage(newChallengeData.finalAverage())
+                    .challengeFinalAverage(finalAverage)
                     .behaviorFinalAverage(null)
                     .build();
         }
 
-        newChallengeData.details().forEach(detail -> detail.setAssessment(assessment));
+        challengeDetails.forEach(detail -> detail.setAssessment(assessment));
 
         repository.save(assessment);
-    }
-
-
-    private record ChallengeAssessmentData(Set<ChallengeDetail> details, double finalAverage) {}
-
-    private ChallengeAssessmentData mapNewChallengeData(ChallengeAssessmentRequest request) {
-
-        List<ChallengeAssessmentRequest.ChallengeData> challengesRequest = request.getChallenges();
-
-        double sumGrades = challengesRequest.stream()
-                .mapToInt(ChallengeAssessmentRequest.ChallengeData::getGrade)
-                .sum();
-
-        double finalAverage = sumGrades / challengesRequest.size(); // Use size() do List, não 'count'
-
-        Set<ChallengeDetail> details = challengesRequest.stream()
-                .map(challenge -> ChallengeDetail.builder()
-                        .description(challenge.getChallenge())
-                        .score(challenge.getGrade())
-                        .build())
-                .collect(Collectors.toSet());
-
-        return new ChallengeAssessmentData(details, finalAverage);
     }
 }

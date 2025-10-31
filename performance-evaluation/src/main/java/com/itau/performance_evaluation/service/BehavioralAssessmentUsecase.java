@@ -1,7 +1,10 @@
 package com.itau.performance_evaluation.service;
 
-import com.itau.performance_evaluation.controller.Request.BehavioralAssessmentRequest;
+import com.itau.performance_evaluation.model.BehavioralDetail;
+
+import java.util.Set;
 
 public interface BehavioralAssessmentUsecase {
-    void create(BehavioralAssessmentRequest behavioralAssessment);
+
+    void createOrUpdate(String employeeId, Set<BehavioralDetail> behaviorsDetails);
 }

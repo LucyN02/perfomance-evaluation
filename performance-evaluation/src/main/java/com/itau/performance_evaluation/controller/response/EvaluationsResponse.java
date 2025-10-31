@@ -1,4 +1,4 @@
-package com.itau.performance_evaluation.controller.Response;
+package com.itau.performance_evaluation.controller.response;
 
 import lombok.Builder;
 import lombok.Data;

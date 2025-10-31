@@ -1,8 +1,10 @@
 package com.itau.performance_evaluation.service;
 
-import com.itau.performance_evaluation.controller.Request.ChallengeAssessmentRequest;
+import com.itau.performance_evaluation.model.ChallengeDetail;
+
+import java.util.Set;
 
 public interface ChallengeAssessmentUsecase {
 
-    void create(ChallengeAssessmentRequest request);
+    void createOrUpdate(String employeeId, Set<ChallengeDetail> challengeDetails);
 }

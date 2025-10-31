@@ -1,19 +1,16 @@
 package com.itau.performance_evaluation.service.usecase;
 
-import com.itau.performance_evaluation.controller.Request.BehavioralAssessmentRequest;
 import com.itau.performance_evaluation.model.BehavioralDetail;
 import com.itau.performance_evaluation.model.PerformanceAssessment;
+import com.itau.performance_evaluation.model.enums.BehavioralEnum;
 import com.itau.performance_evaluation.repository.PerformanceAssessmentRepository;
 import com.itau.performance_evaluation.service.BehavioralAssessmentUsecase;
-import com.itau.performance_evaluation.controller.Request.BehavioralAssessmentRequest.BehavioralData;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Service
 @AllArgsConstructor
@@ -23,11 +20,24 @@ public class BehavioralAssessmentUsecaseImpl implements BehavioralAssessmentUsec
 
     @Override
     @Transactional
-    public void create(BehavioralAssessmentRequest request) {
+    public void createOrUpdate(String employeeId, Set<BehavioralDetail> behaviorsDetails) {
 
-        Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(request.getEmployeeId());
+        Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(employeeId);
 
-        BehavioralAssessmentData newBehavioralData = mapNewBehavioralData(request);
+        double sumWeightedGrades = 0.0;
+
+        int sumWeights = 0;
+
+        for (BehavioralDetail behavioral : behaviorsDetails) {
+
+            int grade = behavioral.getScore();
+            int weight = BehavioralEnum.getByDescription(behavioral.getDescription()).getWeight();
+
+            sumWeightedGrades += (double) grade * weight;
+            sumWeights += weight;
+        }
+
+        double finalAverage = sumWeightedGrades / sumWeights;
 
         PerformanceAssessment assessment;
 
@@ -35,57 +45,25 @@ public class BehavioralAssessmentUsecaseImpl implements BehavioralAssessmentUsec
 
             assessment = assessmentOpt.get();
 
-            assessment.setBehaviorFinalAverage(newBehavioralData.finalAverage());
+            assessment.setBehaviorFinalAverage(finalAverage);
 
             Set<BehavioralDetail> behaviors = assessment.getBehaviors();
 
             behaviors.clear();
 
-            behaviors.addAll(newBehavioralData.details());
+            behaviors.addAll(behaviorsDetails);
         } else {
             assessment = PerformanceAssessment.builder()
-                    .employeeId( request.getEmployeeId())
+                    .employeeId(employeeId)
                     .challengeFinalAverage(null)
-                    .behaviorFinalAverage(newBehavioralData.finalAverage())
-                    .behaviors(newBehavioralData.details())
+                    .behaviorFinalAverage(finalAverage)
+                    .behaviors(behaviorsDetails)
                     .challenges(Set.of())
                     .build();
         }
 
-        newBehavioralData.details().forEach(detail -> detail.setAssessment(assessment));
+        behaviorsDetails.forEach(detail -> detail.setAssessment(assessment));
 
         this.repository.save(assessment);
     }
-
-    private record BehavioralAssessmentData(Set<BehavioralDetail> details, double finalAverage) {}
-
-    private BehavioralAssessmentData mapNewBehavioralData(BehavioralAssessmentRequest request) {
-
-        List<BehavioralData> behaviorsRequest = request.getBehaviors();
-
-        double sumWeightedGrades = 0.0;
-        int sumWeights = 0;
-
-        for (BehavioralData data : behaviorsRequest) {
-
-            int grade = data.getGrade();
-            int weight = data.getBehavioral().getWeight();
-
-            sumWeightedGrades += (double) grade * weight;
-            sumWeights += weight;
-        }
-
-
-        double finalAverage = sumWeightedGrades / sumWeights;
-
-        Set<BehavioralDetail> details = behaviorsRequest.stream()
-                .map(data -> BehavioralDetail.builder()
-                        .description(data.getBehavioral().getDescription())
-                        .score(data.getGrade())
-                        .build())
-                .collect(Collectors.toSet());
-
-        return new BehavioralAssessmentData(details, finalAverage);
-    }
-
 }

@@ -1,4 +1,4 @@
-package com.itau.performance_evaluation.controller.Request;
+package com.itau.performance_evaluation.controller.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
