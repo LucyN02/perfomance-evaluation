@@ -134,6 +134,9 @@ CREATE TABLE tb_behavioral_detail (
 ### Requisição (POST /behaviors)
 
 Endpoint para criação de avaliação dos comportamentos;
+
+**Exemplo de Payload:**
+
 ```json
 {
   "employeeId": "5",
@@ -160,7 +163,10 @@ Endpoint para criação de avaliação dos comportamentos;
 
 ### Requisição (POST /challenges)
 
-Endpoint para criação de avaliação dos desafios;
+Endpoint para criação de avaliação dos desafios:
+
+**Exemplo de Payload:**
+
 ```json
 {
   "employeeId": "5",
