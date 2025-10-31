@@ -5,12 +5,13 @@ import com.itau.performance_evaluation.model.ChallengeDetail;
 import com.itau.performance_evaluation.repository.PerformanceAssessmentRepository;
 import com.itau.performance_evaluation.service.ChallengeAssessmentUsecase;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ChallengeAssessmentUsecaseImpl implements ChallengeAssessmentUsecase {
@@ -20,6 +21,8 @@ public class ChallengeAssessmentUsecaseImpl implements ChallengeAssessmentUsecas
     @Override
     @Transactional
     public void createOrUpdate(String employeeId, Set<ChallengeDetail> challengeDetails) {
+
+        log.info("Iniciando a criação/atualização de desafios para employeeId: {}", employeeId);
 
         Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(employeeId);
 
@@ -56,5 +59,7 @@ public class ChallengeAssessmentUsecaseImpl implements ChallengeAssessmentUsecas
         challengeDetails.forEach(detail -> detail.setAssessment(assessment));
 
         repository.save(assessment);
+
+        log.info("Avaliação salva com sucesso.");
     }
 }

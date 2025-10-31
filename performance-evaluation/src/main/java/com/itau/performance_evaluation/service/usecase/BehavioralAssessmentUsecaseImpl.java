@@ -6,12 +6,13 @@ import com.itau.performance_evaluation.model.enums.BehavioralEnum;
 import com.itau.performance_evaluation.repository.PerformanceAssessmentRepository;
 import com.itau.performance_evaluation.service.BehavioralAssessmentUsecase;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class BehavioralAssessmentUsecaseImpl implements BehavioralAssessmentUsecase {
@@ -21,6 +22,8 @@ public class BehavioralAssessmentUsecaseImpl implements BehavioralAssessmentUsec
     @Override
     @Transactional
     public void createOrUpdate(String employeeId, Set<BehavioralDetail> behaviorsDetails) {
+
+        log.info("Iniciando a criação/atualização de comportamentos para employeeId: {}", employeeId);
 
         Optional<PerformanceAssessment> assessmentOpt = repository.findByEmployeeIdWithDetails(employeeId);
 
@@ -65,5 +68,7 @@ public class BehavioralAssessmentUsecaseImpl implements BehavioralAssessmentUsec
         behaviorsDetails.forEach(detail -> detail.setAssessment(assessment));
 
         this.repository.save(assessment);
+
+        log.info("Avaliação salva com sucesso.");
     }
 }
